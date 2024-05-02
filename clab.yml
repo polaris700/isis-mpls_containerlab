@@ -1,0 +1,100 @@
+name: mpls
+topology:
+  nodes:
+    # pe router
+    pe01:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/pe01.conf:/etc/frr/frr.conf
+        - configs/pe01-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+    pe02:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/pe02.conf:/etc/frr/frr.conf
+        - configs/pe02-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+    # p router        
+    p01:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/p01.conf:/etc/frr/frr.conf
+        - configs/p01-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+    p02:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/p02.conf:/etc/frr/frr.conf
+        - configs/p02-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+    p03:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/p03.conf:/etc/frr/frr.conf
+        - configs/p03-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+    p04:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - configs/daemons:/etc/frr/daemons
+        - configs/p04.conf:/etc/frr/frr.conf
+        - configs/p04-start.sh:/start.sh
+      exec:
+        - bash /start.sh
+
+# host        
+    host01:
+      kind: linux
+      image: wbitt/network-multitool:latest
+      exec:
+        - ip link set eth0 down        
+        - ip addr add 192.168.0.2/24 dev eth1
+        - ip route add default via 192.168.0.1        
+
+    host02:
+      kind: linux
+      image: wbitt/network-multitool:latest
+      exec:
+        - ip link set eth0 down        
+        - ip addr add 192.168.1.2/24 dev eth1
+        - ip route add default via 192.168.1.1        
+        
+  links:
+    # pe - p
+    - endpoints: ["pe01:eth1", "p01:eth1"]
+    - endpoints: ["pe01:eth2", "p02:eth1"]
+    - endpoints: ["pe02:eth1", "p03:eth1"]
+    - endpoints: ["pe02:eth2", "p04:eth1"]
+
+    # p - p
+    - endpoints: ["p01:eth2", "p03:eth2"]
+    - endpoints: ["p02:eth2", "p03:eth3"]
+    - endpoints: ["p02:eth3", "p04:eth2"]
+
+    # pe - host
+    - endpoints: ["pe01:eth3", "host01:eth1"]
+    - endpoints: ["pe02:eth3", "host02:eth1"]
+      
+      
+      
